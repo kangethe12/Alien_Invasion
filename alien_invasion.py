@@ -3,6 +3,7 @@ import pygame
 
 from settings import Settings
 from ship import Ship
+
 from bullet import Bullet
 
 class AlienInvasion:
@@ -43,7 +44,7 @@ class AlienInvasion:
 		while True:
 			self._check_events()
 			self.ship.update()
-			self.bullets.update()
+			self._update_bullets()
 			self._update_screen()
 
 	def _check_events(self):
@@ -83,9 +84,23 @@ class AlienInvasion:
 			self.ship.moving_left=False
 
 	def _fire_bullet(self):
-		#create a new bullet and add it to the bullets group
-		new_bullet=Bullet(self)
-		self.bullets.add(new_bullet)
+		#checking if number of bullets is less than allowed
+		if len(self.bullets)<=self.settings.bullets_allowed:
+
+			#create a new bullet and add it to the bullets group
+			new_bullet=Bullet(self)
+			self.bullets.add(new_bullet)
+
+	def _update_bullets(self):
+		#the method update position of bullets and delete old bullets
+
+		#update bullet positions
+		self.bullets.update()
+
+		#get rid of bullets that have disapeared
+		for bullet in self.bullets.copy():
+			if bullet.rect.bottom<=0:
+				self.bullets.remove(bullet)
 
 	def _update_screen(self):
 		#redraw the screen during each pass through the loop

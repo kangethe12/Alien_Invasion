@@ -5,6 +5,7 @@ from settings import Settings
 from ship import Ship
 
 from bullet import Bullet
+from aliens import Alien
 
 class AlienInvasion:
 	#Class to manage game assets and behavior
@@ -37,6 +38,9 @@ class AlienInvasion:
 		 which behaves like a list with some extra functionality that’s helpful when building games. 
 		 We’ll use this group to draw bullets to the screen on each pass through the main loop and to update each bullet’s position.'''
 		self.bullets=pygame.sprite.Group()
+		self.aliens=pygame.sprite.Group()
+
+		self._create_fleet()
 
 
 	def run_game(self):
@@ -102,6 +106,40 @@ class AlienInvasion:
 			if bullet.rect.bottom<=0:
 				self.bullets.remove(bullet)
 
+
+	def _create_fleet(self):
+		'''create the fleet of aliens'''
+		#create an alien & find the number of aliens in a row.
+		#spacing between alien is equal to one alien
+		alien=Alien(self)
+		alien_width=alien.rect.width
+		#we find the available space by subtracting margins on either side
+		available_space_x=self.settings.screen_width-(2*alien_width)
+		#finding aliens which can fit on the available space
+		number_aliens_x=available_space_x//(2*alien_width)
+
+		#create the first row of aliens
+		for alien_number in range(number_aliens_x):
+			self._create_alien(alien_number)
+			
+	def _create_alien(self,alien_number):
+		#create an alien and place it in the row
+		alien=Alien(self)
+		alien_width=alien.rect.width
+		'''we create a new alien and then set its x-coordinate value 
+		to place it in the row'''
+		'''Each alien is pushed to the right one alien width from the left margin. 
+		Next, we multiply the alien width by 2 to account for the space each alien 
+		takes up,including the empty space to its right, 
+		and we multiply this amount by the alien’s position in the row.'''
+		alien.x=alien_width+2*alien_width*alien_number
+
+		#We use the alien’s x attribute to set the position of its rect.
+		alien.rect.x=alien.x
+
+
+		self.aliens.add(alien)
+
 	def _update_screen(self):
 		#redraw the screen during each pass through the loop
 		self.screen.fill(self.settings.bg_color)
@@ -113,6 +151,9 @@ class AlienInvasion:
 		 we loop through the sprites in bullets and call draw_bullet() on each one '''
 		for bullet in self.bullets.sprites():
 			bullet.draw_bullet()
+		'''The draw() method requires one argument: 
+		a surface on which to draw the elements from the group.'''
+		self.aliens.draw(self.screen)
 
 		#make the most recently drawn screen visible		
 		pygame.display.flip()
